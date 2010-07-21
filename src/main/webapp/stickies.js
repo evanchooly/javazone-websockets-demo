@@ -1,22 +1,20 @@
-var db = null;
+var notes = [
+];
 var socket = null;
 try {
     if (!"WebSocket" in window) {
         alert("Your browser does not support web sockets.  Please try another browser.")
     } else {
         socket = new WebSocket("ws://localhost:8080/stickies");
-    }
-    if (window.openDatabase) {
-        db = openDatabase("NoteTest", "1.0", "HTML5 Database API example", 200000);
-        if (!db) {
-            alert("Failed to open the database on disk.  This is probably because the version was bad or there is not enough space left in this domain's quota");
+        socket.onmessage = function (evt) {
+            process(evt.data);
+        };
+        socket.onclose = function (evt) {
+            alert("socket closed: " + evt);
         }
-    } else {
-        alert("Couldn't open the database.  Persistence will be disabled.");
     }
 } catch(err) {
-    db = null;
-    alert("error!  Couldn't open the database.  Persistence will be disabled.");
+    alert("error!  Couldn't connect to the server.");
 }
 var captured = null;
 var highestZ = 0;
@@ -35,6 +33,7 @@ function Note() {
     var close = document.createElement('div');
     close.className = 'closebutton';
     close.addEventListener('click', function(event) {
+        socket.send("delete-" + self.id);
         return self.close(event)
     }, false);
     note.appendChild(close);
@@ -117,16 +116,11 @@ Note.prototype = {
         this.note.style.zIndex = x;
     },
 
-    close: function(event) {
-        alert("event = " + event);
+
+    close: function() {
         this.cancelPendingSave();
         var note = this;
-        db.transaction(function(tx) {
-            tx.executeSql("DELETE FROM WebKitStickyNotes WHERE id = ?", [
-                note.id
-            ]);
-        });
-        var duration = event.shiftKey ? 2 : .25;
+        var duration = 0.25;
         this.note.style.webkitTransition = '-webkit-transform ' + duration + 's ease-in, opacity ' + duration
             + 's ease-in';
         this.note.offsetTop; // Force style recalc
@@ -163,26 +157,12 @@ Note.prototype = {
         }
         var note = this;
         socket.send("save-" + map(note));
-        db.transaction(function (tx) {
-            tx.executeSql("UPDATE WebKitStickyNotes SET note = ?, timestamp = ?, left = ?, top = ?, zindex = ? WHERE id = ?",
-                [
-                    note.text, note.timestamp, note.left, note.top, note.zIndex, note.id
-                ]);
-        });
     },
 
     saveAsNew: function() {
         this.timestamp = new Date().getTime();
         var note = this;
         socket.send("create-" + map(note));
-        if (db) {
-            db.transaction(function (tx) {
-                tx.executeSql("INSERT INTO WebKitStickyNotes (id, note, timestamp, left, top, zindex) VALUES (?, ?, ?, ?, ?, ?)",
-                    [
-                        note.id, note.text, note.timestamp, note.left, note.top, note.zIndex
-                    ]);
-            });
-        }
     },
 
     onMouseDown: function(e) {
@@ -230,23 +210,9 @@ Note.prototype = {
         this.saveSoon();
     }
 }
-function loaded() {
-    db.transaction(function(tx) {
-        tx.executeSql("SELECT COUNT(*) FROM WebkitStickyNotes", [
-        ], function(result) {
-            loadNotes();
-        }, function(tx, error) {
-            tx.executeSql("CREATE TABLE WebKitStickyNotes (id REAL UNIQUE, note TEXT, timestamp REAL, left TEXT, top TEXT, zindex REAL)",
-                [
-                ], function(result) {
-                loadNotes();
-            });
-        });
-    });
-}
 function loadNotes() {
     db.transaction(function(tx) {
-        tx.executeSql("SELECT id, note, timestamp, left, top, zindex FROM WebKitStickyNotes", [
+        tx.executeSql("SELECT id, note, timestamp, left, top, zIndex FROM WebKitStickyNotes", [
         ], function(tx, result) {
             for (var i = 0; i < result.rows.length; ++i) {
                 var row = result.rows.item(i);
@@ -256,12 +222,12 @@ function loadNotes() {
                 note.timestamp = row['timestamp'];
                 note.left = row['left'];
                 note.top = row['top'];
-                note.zIndex = row['zindex'];
+                note.zIndex = row['zIndex'];
                 if (row['id'] > highestId) {
                     highestId = row['id'];
                 }
-                if (row['zindex'] > highestZ) {
-                    highestZ = row['zindex'];
+                if (row['zIndex'] > highestZ) {
+                    highestZ = row['zIndex'];
                 }
             }
             if (!result.rows.length) {
@@ -282,14 +248,53 @@ function map(note) {
         + ",top:" + note.top + ",zIndex:" + note.zIndex;
 }
 function newNote() {
-    var note = new Note();
-    note.id = ++highestId;
-    note.timestamp = new Date().getTime();
-    note.left = Math.round(Math.random() * 400) + 'px';
-    note.top = Math.round(Math.random() * 500) + 'px';
-    note.zIndex = ++highestZ;
-    note.saveAsNew();
+    socket.send("create-");
+    //    var note = new Note();
+    //    note.id = ++highestId;
+    //    note.timestamp = new Date().getTime();
+    //    note.left = Math.round(Math.random() * 400) + 'px';
+    //    note.top = Math.round(Math.random() * 500) + 'px';
+    //    note.zIndex = ++highestZ;
+    //    note.saveAsNew();
+    //    notes[id] = note;
 }
-if (db != null) {
-    addEventListener('load', loaded, false);
+function createNote(piece) {
+    eval(piece);
+    var note = new Note();
+    note.id = noteArray['id'];
+    note.text = noteArray['text'];
+    note.timestamp = noteArray['timestamp'];
+    note.left = noteArray['left'];
+    note.top = noteArray['top'];
+    note.zIndex = noteArray['zIndex'];
+    notes[note.id] = note;
+}
+function updateNote(piece) {
+    eval(piece);
+    var note = notes[noteArray['id']];
+    note.id = noteArray['id'];
+    note.text = noteArray['text'];
+    note.timestamp = noteArray['timestamp'];
+    note.left = noteArray['left'];
+    note.top = noteArray['top'];
+    note.zIndex = noteArray['zIndex'];
+}
+function deleteNote(id) {
+    var note = notes[id];
+    notes[id] = null;
+    note.close();
+}
+function process(data) {
+    var pieces = data.split("-");
+    if (pieces[0] == "create") {
+        createNote(pieces[1])
+    } else {
+        if (pieces[0] == "save") {
+            updateNote(pieces[1])
+        } else {
+            if (pieces[0] == "delete") {
+                deleteNote(pieces[1])
+            }
+        }
+    }
 }
