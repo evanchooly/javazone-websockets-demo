@@ -46,3 +46,7 @@ body {
     padding: 2px 4px;
     text-align: right;
 }
+
+.error {
+    color: red;
+}

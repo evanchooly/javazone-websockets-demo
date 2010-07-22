@@ -9,13 +9,21 @@ try {
         socket.onmessage = function (evt) {
             process(evt.data);
         };
+
         socket.onclose = function (evt) {
-            alert("socket closed: " + evt);
+            connectionProblems();
         }
     }
 } catch(err) {
-    alert("error!  Couldn't connect to the server.");
+    connectionProblems();
 }
+
+function connectionProblems() {
+    document.getElementById("welcome").innerHTML
+        = "<span class=\"error\">We're having problems connecting to the server.  Reload to try reconnecting.</span>";
+    document.getElementById("newNoteButton").style.display = "none";
+}
+
 var captured = null;
 var highestZ = 0;
 var highestId = 0;
