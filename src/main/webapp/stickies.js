@@ -190,6 +190,7 @@ Note.prototype = {
         }
         this.left = e.clientX - this.startX + 'px';
         this.top = e.clientY - this.startY + 'px';
+        this.save();
         return false;
     },
 
