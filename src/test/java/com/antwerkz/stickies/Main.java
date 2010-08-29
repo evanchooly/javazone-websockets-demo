@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import com.sun.grizzly.arp.DefaultAsyncHandler;
 import com.sun.grizzly.http.SelectorThread;
-import com.sun.grizzly.http.servlet.ServletAdapter;
 import com.sun.grizzly.tcp.Adapter;
 import com.sun.grizzly.tcp.StaticResourcesAdapter;
 import com.sun.grizzly.util.Utils;
@@ -40,7 +39,6 @@ public class Main {
         st.listen();
 
         WebSocketEngine.getEngine().register("/stickies", new StickiesApplication());
-
 
         return st;
     }

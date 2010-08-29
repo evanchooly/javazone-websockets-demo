@@ -219,35 +219,6 @@ Note.prototype = {
         this.saveSoon();
     }
 }
-function loadNotes() {
-    db.transaction(function(tx) {
-        tx.executeSql("SELECT id, note, timestamp, left, top, zIndex FROM WebKitStickyNotes", [
-        ], function(tx, result) {
-            for (var i = 0; i < result.rows.length; ++i) {
-                var row = result.rows.item(i);
-                var note = new Note();
-                note.id = row['id'];
-                note.text = row['note'];
-                note.timestamp = row['timestamp'];
-                note.left = row['left'];
-                note.top = row['top'];
-                note.zIndex = row['zIndex'];
-                if (row['id'] > highestId) {
-                    highestId = row['id'];
-                }
-                if (row['zIndex'] > highestZ) {
-                    highestZ = row['zIndex'];
-                }
-            }
-            if (!result.rows.length) {
-                newNote();
-            }
-        }, function(tx, error) {
-            alert('Failed to retrieve notes from database - ' + error.message);
-            return;
-        });
-    });
-}
 function modifiedString(date) {
     return 'Last Modified: ' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' '
         + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
@@ -258,14 +229,6 @@ function map(note) {
 }
 function newNote() {
     socket.send("create-");
-    //    var note = new Note();
-    //    note.id = ++highestId;
-    //    note.timestamp = new Date().getTime();
-    //    note.left = Math.round(Math.random() * 400) + 'px';
-    //    note.top = Math.round(Math.random() * 500) + 'px';
-    //    note.zIndex = ++highestZ;
-    //    note.saveAsNew();
-    //    notes[id] = note;
 }
 function createNote(piece) {
     eval(piece);
