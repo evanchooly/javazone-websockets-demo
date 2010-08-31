@@ -1,38 +1,39 @@
-var notes = [
-];
+var notes = new Array;
+
 var sticky = {
     'poll' : function() {
         new Ajax.Request('long_polling', {
             method : 'GET',
-            onSuccess : function(transport) {
-                var response = transport.responseText || "no response text";
-                alert("Success! \n\n" + response);
+            onSuccess : function(message) {
+                process(message.responseText)
             }
         });
     },
     'create' : function(message) {
+        alert("create() sending: " + message);
         new Ajax.Request('long_polling', {
             method : 'POST',
+            postBody: message,
             onSuccess : function(transport) {
                 var response = transport.responseText || "no response text";
-                alert("Success! \n\n" + response);
+                process(response);
             }
         });
     },
     'send' : function(message) {
         new Ajax.Request('long_polling', {
             method : 'POST',
-            parameters: {operation: message}
+            postBody: message
         });
     },
-    'update' : function(req) {
+    'update' : function() {
         sticky.poll();
     }
-}
+};
 var rules = {
     '#newNoteButton': function(element) {
         element.onclick = function() {
-            sticky.create();
+            newNote();
         };
     }
 };
@@ -196,7 +197,7 @@ Note.prototype = {
         if (!("mouseMoveHandler" in this)) {
             this.mouseMoveHandler = function(e) {
                 return self.onMouseMove(e)
-            }
+            };
             this.mouseUpHandler = function(e) {
                 return self.onMouseUp(e)
             }
@@ -216,14 +217,14 @@ Note.prototype = {
         return false;
     },
 
-    onMouseUp: function(e) {
+    onMouseUp: function() {
         document.removeEventListener('mousemove', this.mouseMoveHandler, true);
         document.removeEventListener('mouseup', this.mouseUpHandler, true);
         this.save();
         return false;
     },
 
-    onNoteClick: function(e) {
+    onNoteClick: function() {
         this.editField.focus();
         getSelection().collapseToEnd();
     },
@@ -232,7 +233,7 @@ Note.prototype = {
         this.dirty = true;
         this.saveSoon();
     }
-}
+};
 function modifiedString(date) {
     return 'Last Modified: ' + date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' '
         + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
@@ -271,8 +272,9 @@ function deleteNote(id) {
     note.close();
 }
 function process(data) {
-    alert("data = " + data);
+    alert("processing. data = " + data);
     var pieces = data.split("-");
+//    alert("pieces = " + pieces);
     if (pieces[0] == "create") {
         createNote(pieces[1])
     } else {

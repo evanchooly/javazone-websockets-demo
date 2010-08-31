@@ -9,7 +9,7 @@
     <version>1.0</version>
     <name>websocket-stickies</name>
     <properties>
-        <grizzly.version>1.9.19-SNAPSHOT</grizzly.version>
+        <grizzly.version>1.9.19</grizzly.version>
     </properties>
 
     <repositories>
