@@ -2,28 +2,37 @@ var notes = new Array;
 
 var sticky = {
     'poll' : function() {
-        new Ajax.Request('long_polling', {
+        new Ajax.Request('comet', {
             method : 'GET',
+            onResponse : function(message) {
+                alert(message);
+                process(message.responseText || "no response text")
+            }/*,
             onSuccess : function(message) {
-                process(message.responseText)
-            }
+                process(message.responseText || "no response text")
+            }*/
         });
     },
     'create' : function(message) {
         alert("create() sending: " + message);
-        new Ajax.Request('long_polling', {
+        new Ajax.Request('comet', {
             method : 'POST',
-            postBody: message,
+            postBody: message/*,
             onSuccess : function(transport) {
-                var response = transport.responseText || "no response text";
-                process(response);
-            }
+                process(transport.responseText || "no response text");
+            }*/
         });
     },
     'send' : function(message) {
-        new Ajax.Request('long_polling', {
+        new Ajax.Request('comet', {
             method : 'POST',
-            postBody: message
+            postBody: message/*,
+            onResponse : function(message) {
+                process(message.responseText || "no response text")
+            },
+            onSuccess : function(message) {
+                process(message.responseText || "no response text")
+            }*/
         });
     },
     'update' : function() {

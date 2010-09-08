@@ -4,8 +4,7 @@ import java.io.IOException;
 
 import com.sun.grizzly.arp.DefaultAsyncHandler;
 import com.sun.grizzly.http.SelectorThread;
-import com.sun.grizzly.tcp.Adapter;
-import com.sun.grizzly.tcp.StaticResourcesAdapter;
+import com.sun.grizzly.http.servlet.ServletAdapter;
 import com.sun.grizzly.util.Utils;
 import com.sun.grizzly.websockets.WebSocketAsyncFilter;
 import com.sun.grizzly.websockets.WebSocketEngine;
@@ -30,7 +29,9 @@ public class Main {
         st.setMaxThreads(2);
         st.setPort(8080);
         st.setDisplayConfiguration(Utils.VERBOSE_TESTS);
-        final Adapter adapter = new StaticResourcesAdapter("src/main/webapp");
+//        st.setAdapter(new StaticResourcesAdapter("src/main/webapp"));
+        final ServletAdapter adapter = new ServletAdapter(new CometServlet());
+        adapter.addRootFolder("src/main/webapp");
         st.setAdapter(adapter);
         st.setAsyncHandler(new DefaultAsyncHandler());
         st.setEnableAsyncExecution(true);

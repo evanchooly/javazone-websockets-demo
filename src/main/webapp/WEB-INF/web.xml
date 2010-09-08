@@ -4,14 +4,14 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd ">
 
 	<servlet>
-		<servlet-name>LongPollingServlet</servlet-name>
-		<servlet-class>com.antwerkz.stickies.LongPollingServlet</servlet-class>
+		<servlet-name>CometServlet</servlet-name>
+		<servlet-class>com.antwerkz.stickies.CometServlet</servlet-class>
         <load-on-startup>0</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>LongPollingServlet</servlet-name>
-		<url-pattern>/long_polling</url-pattern>
+		<servlet-name>CometServlet</servlet-name>
+		<url-pattern>/comet</url-pattern>
 	</servlet-mapping>
 
 </web-app>

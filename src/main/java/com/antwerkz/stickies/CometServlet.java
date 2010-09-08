@@ -2,13 +2,13 @@ package com.antwerkz.stickies;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,10 +18,10 @@ import com.sun.grizzly.comet.CometEngine;
 import com.sun.grizzly.comet.CometHandler;
 import com.sun.grizzly.websockets.WebSocketEngine;
 
-public class LongPollingServlet extends HttpServlet {
+public class CometServlet extends HttpServlet {
     private Map<String, Note> notes = new HashMap<String, Note>();
     private CometContext<StickyHandler> context;
-    private final static String JUNK = "<!-- Comet is a programming technique that enables web " +
+    final static String JUNK = "<!-- Comet is a programming technique that enables web " +
         "servers to send data to the client without having any need " +
         "for the client to request it. -->\n";
 
@@ -29,7 +29,7 @@ public class LongPollingServlet extends HttpServlet {
     @SuppressWarnings("unchecked")
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        final String contextPath = config.getServletContext().getContextPath() + "/long_polling";
+        final String contextPath = config.getServletContext().getContextPath() + "/comet";
         context = CometEngine.getEngine().register(contextPath);
         context.setBlockingNotification(true);
         context.setExpirationDelay(5 * 30 * 1000);
@@ -43,9 +43,9 @@ public class LongPollingServlet extends HttpServlet {
         response.setHeader("Cache-Control", "private");
         response.setHeader("Pragma", "no-cache");
 //        For IE, Safari and Chrome, we must output some junk to enable streaming
-        PrintWriter writer = response.getWriter();
+        ServletOutputStream writer = response.getOutputStream();
         for (int i = 0; i < 10; i++) {
-            response.getWriter().write(JUNK);
+            writer.println(JUNK);
         }
         writer.flush();
         StickyHandler handler = new StickyHandler(this);
@@ -61,9 +61,9 @@ public class LongPollingServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
 
         final String text = read(request.getInputStream());
-        System.out.println("LongPollingServlet.doPost: text = " + text);
+        System.out.println("CometServlet.doPost: text = " + text);
         context.notify(text);
-        response.getWriter().println("success");
+        response.getOutputStream().println("success");
     }
 
     private String read(ServletInputStream stream) throws IOException {
@@ -78,14 +78,14 @@ public class LongPollingServlet extends HttpServlet {
     }
 
     private void createNote() throws IOException {
-        System.out.println("LongPollingServlet.createNote");
+        System.out.println("CometServlet.createNote");
         Note note = new Note();
         notes.put(note.getId(), note);
         broadcast(null, "create-" + note.toString());
     }
 
     private void saveNote(StickyHandler handler, String[] params) throws IOException {
-        System.out.println("LongPollingServlet.saveNote");
+        System.out.println("CometServlet.saveNote");
         String[] pieces = params[1].split(",");
         Map<String, String> map = new HashMap<String, String>();
         for (String s : pieces) {
@@ -108,7 +108,7 @@ public class LongPollingServlet extends HttpServlet {
 
     @SuppressWarnings("unchecked")
     private void broadcast(StickyHandler origin, String message) throws IOException {
-        System.out.println("LongPollingServlet.broadcast: message = " + message);
+        System.out.println("CometServlet.broadcast: message = " + message);
         final Set<CometHandler> handlers = context.getCometHandlers();
         for (CometHandler cometHandler : handlers) {
             if (!cometHandler.equals(origin)) {
@@ -121,27 +121,27 @@ public class LongPollingServlet extends HttpServlet {
     enum CometOperations {
         CREATE {
             @Override
-            void accept(LongPollingServlet servlet, StickyHandler handler, String[] params) throws IOException {
-                System.out.println("LongPollingServlet$CometOperations.accept");
+            void accept(CometServlet servlet, StickyHandler handler, String[] params) throws IOException {
+                System.out.println("CometServlet$CometOperations.accept");
                 servlet.createNote();
             }
         },
         SAVE {
             @Override
-            void accept(LongPollingServlet servlet, StickyHandler socket, String[] params) throws IOException {
-                System.out.println("LongPollingServlet$CometOperations.accept");
+            void accept(CometServlet servlet, StickyHandler socket, String[] params) throws IOException {
+                System.out.println("CometServlet$CometOperations.accept");
                 servlet.saveNote(socket, params);
             }
         },
         DELETE {
             @Override
-            void accept(LongPollingServlet servlet, StickyHandler socket, String[] params) throws IOException {
-                System.out.println("LongPollingServlet$CometOperations.accept");
+            void accept(CometServlet servlet, StickyHandler socket, String[] params) throws IOException {
+                System.out.println("CometServlet$CometOperations.accept");
                 servlet.deleteNote(socket, params);
             }
         };
 
-        abstract void accept(LongPollingServlet servlet, StickyHandler handler, String[] params) throws IOException;
+        abstract void accept(CometServlet servlet, StickyHandler handler, String[] params) throws IOException;
 
     }
 }
