@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.sun.grizzly.tcp.Request;
 import com.sun.grizzly.websockets.DataFrame;
 import com.sun.grizzly.websockets.WebSocket;
 import com.sun.grizzly.websockets.WebSocketApplication;
@@ -27,12 +27,13 @@ public class StickiesApplication extends WebSocketApplication {
     public void onConnect(WebSocket socket) {
         super.onConnect(socket);
         for (Note note : notes.values()) {
-            try {
-                socket.send("create-" + note.toString());
-            } catch (IOException e) {
-                logger.fine(e.getMessage());
-            }
+            socket.send("create-" + note.toString());
         }
+    }
+
+    @Override
+    public boolean isApplicationRequest(Request request) {
+        return request.requestURI().equals("/stickies");
     }
 
     private void broadcast(WebSocket original, String text) throws IOException {
@@ -45,12 +46,7 @@ public class StickiesApplication extends WebSocketApplication {
     }
 
     private void send(WebSocket socket, String text) throws IOException {
-        try {
-            socket.send(text);
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, "Removing client: " + e.getMessage(), e);
-            onClose(socket);
-        }
+        socket.send(text);
     }
 
     private void createNote(WebSocket socket, String[] params) throws IOException {

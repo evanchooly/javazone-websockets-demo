@@ -9,9 +9,10 @@
     <version>1.0</version>
     <name>websocket-stickies</name>
     <properties>
-        <grizzly.version>1.9.19</grizzly.version>
+        <grizzly.version>1.9.37-SNAPSHOT</grizzly.version>
     </properties>
 
+<!--
     <repositories>
         <repository>
             <id>glassfish</id>
@@ -24,12 +25,19 @@
             <url>http://download.java.net/maven/2</url>
         </repository>
     </repositories>
-    
+-->
+
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-http-servlet</artifactId>
+            <version>${grizzly.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -70,7 +78,6 @@
                     </arguments>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 </project>

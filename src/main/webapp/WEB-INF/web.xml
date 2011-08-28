@@ -4,14 +4,14 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd ">
 
 	<servlet>
-		<servlet-name>CometServlet</servlet-name>
-		<servlet-class>com.antwerkz.stickies.CometServlet</servlet-class>
+		<servlet-name>WebSocketsServlet</servlet-name>
+		<servlet-class>com.antwerkz.stickies.WebSocketsServlet</servlet-class>
         <load-on-startup>0</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>CometServlet</servlet-name>
-		<url-pattern>/comet</url-pattern>
+		<servlet-name>WebSocketsServlet</servlet-name>
+		<url-pattern>/ws</url-pattern>
 	</servlet-mapping>
 
 </web-app>

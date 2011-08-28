@@ -1,18 +1,17 @@
 package com.antwerkz.stickies;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 
 import com.antwerkz.stickies.CometServlet.CometOperations;
 import com.sun.grizzly.comet.CometEvent;
 import com.sun.grizzly.comet.CometHandler;
 
-public class StickyHandler implements CometHandler<HttpServletResponse> {
+public class StickyHandler implements CometHandler<PrintWriter> {
     private static final String BEGIN_SCRIPT_TAG = "<script type='text/javascript'>alert('response!');";
     private static final String END_SCRIPT_TAG = "</script>\n";
-    private HttpServletResponse response;
+    private PrintWriter writer;
     private CometServlet cometServlet;
 
     public StickyHandler(final CometServlet cometServlet) {
@@ -20,16 +19,16 @@ public class StickyHandler implements CometHandler<HttpServletResponse> {
     }
 
     public void write(String text) throws IOException {
-        ServletOutputStream writer = response.getOutputStream();
-        writer.println(BEGIN_SCRIPT_TAG /*+ text */+ END_SCRIPT_TAG);
-//        for (int i = 0; i < 10000; i++) {
-//            writer.println(CometServlet.JUNK);
-//        }
+//        ServletOutputStream writer = this.writer.getOutputStream();
+        writer.println(/*BEGIN_SCRIPT_TAG +*/ text /*+ END_SCRIPT_TAG*/);
+        for (int i = 0; i < 10; i++) {
+            writer.println("                                                                                        ");
+        }
         writer.flush();
     }
 
-    public void attach(HttpServletResponse attachment) {
-        response = attachment;
+    public void attach(PrintWriter attachment) {
+        writer = attachment;
     }
 
     public void onEvent(CometEvent event) throws IOException {

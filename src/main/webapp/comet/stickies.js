@@ -1,42 +1,41 @@
 var notes = new Array;
 
+function trim(sString) {
+    while (sString.substring(0, 1) == ' ') {
+        sString = sString.substring(1, sString.length);
+    }
+    while (sString.substring(sString.length - 1, sString.length) == ' ') {
+        sString = sString.substring(0, sString.length - 1);
+    }
+    return sString;
+}
+
 var sticky = {
     'poll' : function() {
         new Ajax.Request('comet', {
             method : 'GET',
             onResponse : function(message) {
-                alert(message);
-                process(message.responseText || "no response text")
-            }/*,
+                process(message.responseText);
+            },
             onSuccess : function(message) {
-                process(message.responseText || "no response text")
-            }*/
-        });
-    },
-    'create' : function(message) {
-        alert("create() sending: " + message);
-        new Ajax.Request('comet', {
-            method : 'POST',
-            postBody: message/*,
-            onSuccess : function(transport) {
-                process(transport.responseText || "no response text");
-            }*/
+                process(message.responseText);
+            }
         });
     },
     'send' : function(message) {
         new Ajax.Request('comet', {
             method : 'POST',
-            postBody: message/*,
+            postBody: message,
             onResponse : function(message) {
-                process(message.responseText || "no response text")
+                process(message.responseText);
             },
             onSuccess : function(message) {
-                process(message.responseText || "no response text")
-            }*/
+                process(message.responseText);
+            }
         });
     },
     'update' : function() {
-        sticky.poll();
+        alert('update!');
     }
 };
 var rules = {
@@ -281,7 +280,8 @@ function deleteNote(id) {
     note.close();
 }
 function process(data) {
-    alert("processing. data = " + data);
+    data = trim(data);
+//    alert("processing. data = " + data);
     var pieces = data.split("-");
 //    alert("pieces = " + pieces);
     if (pieces[0] == "create") {
@@ -295,4 +295,5 @@ function process(data) {
             }
         }
     }
+    sticky.poll();
 }

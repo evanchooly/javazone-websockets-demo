@@ -2,6 +2,7 @@ package com.antwerkz.stickies;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -21,19 +22,25 @@ import com.sun.grizzly.websockets.WebSocketEngine;
 public class CometServlet extends HttpServlet {
     private Map<String, Note> notes = new HashMap<String, Note>();
     private CometContext<StickyHandler> context;
-    final static String JUNK = "<!-- Comet is a programming technique that enables web " +
-        "servers to send data to the client without having any need " +
-        "for the client to request it. -->\n";
+//    final static String JUNK = "<!-- Comet is a programming technique that enables web " +
+//        "servers to send data to the client without having any need " +
+//        "for the client to request it. -->\n";
+    final static String JUNK = "                                                       " +
+        "                                                       " +
+        "                                                       " +
+        "                                                       " +
+        "                                                       ";
 
     @Override
     @SuppressWarnings("unchecked")
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
+        WebSocketEngine.getEngine().register("/stickies", new StickiesApplication());
+
         final String contextPath = config.getServletContext().getContextPath() + "/comet";
         context = CometEngine.getEngine().register(contextPath);
         context.setBlockingNotification(true);
         context.setExpirationDelay(5 * 30 * 1000);
-        WebSocketEngine.getEngine().register("/stickies", new StickiesApplication());
     }
 
     @Override
@@ -42,14 +49,14 @@ public class CometServlet extends HttpServlet {
         response.setContentType("text/html");
         response.setHeader("Cache-Control", "private");
         response.setHeader("Pragma", "no-cache");
+        final PrintWriter writer = response.getWriter();
 //        For IE, Safari and Chrome, we must output some junk to enable streaming
-        ServletOutputStream writer = response.getOutputStream();
-        for (int i = 0; i < 10; i++) {
-            writer.println(JUNK);
-        }
+//        for (int i = 0; i < 10; i++) {
+//            writer.println(JUNK);
+//        }
         writer.flush();
         StickyHandler handler = new StickyHandler(this);
-        handler.attach(response);
+        handler.attach(writer);
         context.addCometHandler(handler);
     }
 
