@@ -1,11 +1,17 @@
 var notes = [
 ];
 var socket = null;
+var wsClass = null;
+if ( typeof WebSocket != 'undefined' ) {
+    wsClass = WebSocket;
+} else if ( typeof MozWebSocket != 'undefined' ) {
+    wsClass = MozWebSocket;
+}
 try {
     if (!"WebSocket" in window) {
         alert("Your browser does not support web sockets.  Please try another browser.")
     } else {
-        socket = new WebSocket("ws://localhost:8080/stickies");
+        socket = new wsClass("ws://localhost:8080/stickies");
         socket.onmessage = function (evt) {
             process(evt.data);
         };
