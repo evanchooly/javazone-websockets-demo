@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <head>
+    <title>AngularJS Websockets demo</title>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="http://code.angularjs.org/angular-0.9.19.js" ng:autobind></script>
+    <script src="controllers.js"></script>
+    <script src="services.js"></script>
+    <script src="directives.js"></script>
+  </head>
+  <body ng:controller="StickyCtrl">
+    
+    <p>
+      This page demonstrates the use of the
+      <a href="http://www.whatwg.org/specs/web-socket-protocol/">WebSocket Protocol</a>.
+      Any notes you create will be visible in real time in another browser.
+    </p>
+    <button ng:click="newNote()" ng:disabled="{{noWebsockets}}">New Note</button>
+
+    
+      {{noteId}}
+    </div>
+
+    <div ng:repeat="(noteId, note) in notes" class="note" ngx:draggable="note"
+         ng:style="{left: note.left + 'px', top: note.top + 'px'}">
+      <div class="closebutton" ng:click="deleteNote(noteId)"></div>
+      <div class="edit" ngx:contenteditable="note.text"></div>
+      <div class="timestamp">Last Modified: {{note.timestamp | date:"yyyy-M-d hh:mm:ss"}}</div>
+    </div>
+
+    <p class="error" ng:show="noWebsockets" style="display:none">
+      Your browser does not support web sockets.  Please try another browser.
+    </p>
+  </body>
+</html>
